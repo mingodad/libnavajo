@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -27,7 +27,7 @@ int AuthPAM::start ()
    */
   if (!dlopen_pam (pam_so))
   {
-    LOG->append(ERROR, "PAM: Could not load PAM library " + std::string(pam_so) + std::string(dlerror()));
+    LOG->append(ERROR, "PAM: Could not load PAM library " + nw::string(pam_so) + nw::string(dlerror()));
 
     #if DLOPEN_PAM
     dlclose_pam ();
@@ -74,7 +74,7 @@ int AuthPAM::conv (int n, const struct pam_message **msg_array, struct pam_respo
     const struct pam_message *msg = msg_array[i];
     aresp[i].resp_retcode = 0;
     aresp[i].resp = NULL;
-  
+
     /* use PAM_PROMPT_ECHO_x hints */
     switch (msg->msg_style)
     {
@@ -122,7 +122,7 @@ int AuthPAM::authentificate(const char *username, const char *password, const ch
 
   strncpy (up.username, username, 100);
   strncpy (up.password, password, 100);
-  strncpy (up.common_name, "", 100);    
+  strncpy (up.common_name, "", 100);
 
   /* Initialize PAM */
   conv.conv = AuthPAM::conv;
@@ -138,7 +138,7 @@ int AuthPAM::authentificate(const char *username, const char *password, const ch
         ret = 1;
 
     /* Close PAM */
-    pam_end (pamh, status);      
+    pam_end (pamh, status);
   }
 
   return ret;

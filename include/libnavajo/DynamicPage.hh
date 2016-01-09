@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1  
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -14,8 +14,14 @@
 #ifndef DYNAMICPAGE_HH_
 #define DYNAMICPAGE_HH_
 
+#ifdef USE_USTL
+#include <ustl.h>
+namespace nw=ustl;
+#else
 #include <string>
-#include <typeinfo> 
+#include <typeinfo>
+namespace nw=std;
+#endif // USE_USTL
 
 class DynamicPage
 {
@@ -23,25 +29,25 @@ class DynamicPage
   public:
     DynamicPage() {};
     virtual bool getPage(HttpRequest* request, HttpResponse *response) = 0;
-    
+
 
     /**********************************************************************/
-     
+
     template<class T> static inline T getValue (string s)
-    { 
+    {
       if (!s.length())
-       throw std::bad_cast();
-       
-	     std::istringstream iss(s); 
-	     T tmp; iss>>tmp;   
-	       
+       throw nw::bad_cast();
+
+	     nw::istringstream iss(s);
+	     T tmp; iss>>tmp;
+
 	     if(iss.fail())
-	       throw std::bad_cast();
-	      
+	       throw nw::bad_cast();
+
 	      return tmp;
 
 	  };
-    
+
     /**********************************************************************/
 
     inline bool noContent( HttpResponse *response )
@@ -51,7 +57,7 @@ class DynamicPage
     }
 
     /**********************************************************************/
-    
+
     inline bool fromString( const string& resultat, HttpResponse *response )
     {
       size_t webpageLen;
@@ -64,7 +70,7 @@ class DynamicPage
       return true;
     }
 
-  
+
 };
 
 #endif

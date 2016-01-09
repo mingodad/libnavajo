@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -14,18 +14,24 @@
 #ifndef IPADDRESS_HH_
 #define IPADDRESS_HH_
 
+#ifdef USE_USTL
+#include <ustl.h>
+namespace nw=ustl;
+#else
 #include <stdexcept>
-#include <errno.h>
 #include <vector>
 #include <string>
 #include <sstream>
+namespace nw=std;
+#endif // USE_USTL
+#include <errno.h>
 #include <string.h>
 
+#include "pthread.h"
 
 #ifdef WIN32
 
-#include "pthread.h"
-#include <winsock2.h> 
+#include <winsock2.h>
 #include <Windows.h>
 #include <in6addr.h>
 #include <ws2tcpip.h>
@@ -51,7 +57,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-using namespace std;
+using namespace nw;
 
 #define INET6_ADDRLEN 	16
 
@@ -127,7 +133,7 @@ class IpAddress
   {
  	  bool res=true;
 	  if (ipversion == 4)
-	    res = ip.v4 < A.ip.v4; 
+	    res = ip.v4 < A.ip.v4;
 	  else //IPv6
 	  {
  	    int i=0;
@@ -171,7 +177,7 @@ class IpAddress
     struct sockaddr_in6 sin6;
 
     pthread_mutex_lock( &resolvIP_mutex );
-    
+
     if (ipversion == 4)
     {
       sin.sin_family=AF_INET;
@@ -187,7 +193,7 @@ class IpAddress
     }
 
     pthread_mutex_unlock( &resolvIP_mutex );
-    
+
     return (!error);
   };
 
@@ -195,7 +201,7 @@ class IpAddress
   {
     IpAddress* newIp =  new IpAddress(value);
 
-    if (newIp != NULL && !newIp->isNull() ) 
+    if (newIp != NULL && !newIp->isNull() )
       return newIp;
 
     if (newIp != NULL) delete newIp;
@@ -219,12 +225,12 @@ class IpNetwork
     IpNetwork() { };
     IpNetwork(const IpAddress &A): addr(A)
       { if (A.ipversion == 4) mask=32; else mask=128; };
-    IpNetwork(const IpAddress &a,const u_int8_t &m) 
+    IpNetwork(const IpAddress &a,const u_int8_t &m)
       { addr = a; mask=m;  };
 
 
   // TODO: IpNetwork(const string& value)
-  
+
 
     inline bool operator<(const IpNetwork& A) const
     {
@@ -244,7 +250,7 @@ class IpNetwork
       }
 
       if (A.addr.ipversion == 6)
-      { 
+      {
         if (addr.ipversion != 6) return true; // IpV6 > IpV4
 
         bool res=true;
@@ -272,7 +278,7 @@ class IpNetwork
     inline string strCIDR() const
     {
       string netCIDR=addr.str()+"/";
-      std::stringstream masklengthSs; masklengthSs << (int)mask;
+      nw::ostringstream masklengthSs; masklengthSs << (int)mask;
       netCIDR+=masklengthSs.str();
       return netCIDR;
     };
@@ -282,7 +288,7 @@ class IpNetwork
       * @param ip is an ip address
       * @param net is a vector of IpNetwork
       * @return true if it belongs to local network, false otherwise
-      */    
+      */
 
     inline bool isInside(const IpAddress& ip) const
     {
@@ -366,10 +372,10 @@ class IpNetwork
          	  bool thisistheend=false;
 	          maskDec=0;
 	          for (u_int8_t j=0; j < 32 ; j++)
-	            if ((netmask >> (31-j)) & 1) 
+	            if ((netmask >> (31-j)) & 1)
 	            {
 	              if (!thisistheend)
-        		      maskDec++; 
+        		      maskDec++;
 	              else
 	              {
         		      delete addr;
@@ -383,18 +389,18 @@ class IpNetwork
         else
         {
 	        size_t s=0, e=0, j=0;
-	
+
 	        while (( maskStr[s] == ' ' || maskStr[s] == '\t' ) && s < maskStr.length())
 	          s++;
 	        e=s;
-	
+
           if (e < maskStr.length())
-    	    
+
     	    while ( e < maskStr.length() && maskStr[e] >= '0' && maskStr[e] <= '9'  )
 		        e++;
-	        
+
 	        j=e;
-	
+
 	        while (j < maskStr.length() && ( maskStr[j] == ' ' || maskStr[j] == '\t' || maskStr[j] == '\n' || maskStr[j] == '\r') )
 	          j++;
 
@@ -422,13 +428,13 @@ class IpNetwork
   * @param ip is an ip address
   * @param net is a vector of IpNetwork
   * @return true if it belongs to local network, false otherwise
-  */    
+  */
 
-inline static bool isIpBelongToIpNetwork(const IpAddress& ip, const std::vector<IpNetwork>& net)
+inline static bool isIpBelongToIpNetwork(const IpAddress& ip, const nw::vector<IpNetwork>& net)
 {
   bool res = false;
 
-  for( std::vector<IpNetwork>::const_iterator i=net.begin(); i!=net.end() && !res; i++)
+  for( nw::vector<IpNetwork>::const_iterator i=net.begin(); i!=net.end() && !res; i++)
     res = i->isInside(ip);
 
   return res;

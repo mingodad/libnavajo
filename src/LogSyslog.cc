@@ -6,7 +6,7 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -23,7 +23,7 @@
   * \param l - LogSeverity
   * \param m - message
   */
-  void LogSyslog::append(const NvjLogSeverity& l, const std::string& message, const std::string& details)
+  void LogSyslog::append(const NvjLogSeverity& l, const nw::string& message, const nw::string& details)
   {
 
     int type;
@@ -56,7 +56,7 @@
   /***********************************************************************/
   /**
   *  initialize the logoutput
-  */ 
+  */
 
   void LogSyslog::initialize()
   {
@@ -68,8 +68,8 @@
   /***********************************************************************/
   /**
   * LogSyslog - constructor
-  */ 
-  
+  */
+
   LogSyslog::LogSyslog(const char *id)
   {
     strncpy (ident, id, 30);
@@ -78,7 +78,7 @@
   /***********************************************************************/
   /**
   * ~LogRecorder - destructor
-  */   
+  */
 
   LogSyslog::~LogSyslog()
   {

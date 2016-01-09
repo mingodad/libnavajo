@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LogOutput.hh 
+ * @file  LogOutput.hh
  *
  * @brief Generic log output (abstract class)
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -14,9 +14,15 @@
 #ifndef LOGOUTPUT_HH_
 #define LOGOUTPUT_HH_
 
+#ifdef USE_USTL
+#include <ustl.h>
+namespace nw=ustl;
+#else
 #include <string>
+namespace nw=std;
+#endif // USE_USTL
 
-  typedef enum 
+  typedef enum
   {
         NVJ_DEBUG,
         NVJ_INFO,
@@ -36,11 +42,11 @@
       inline void setWithDateTime(bool b) { withDateTime=b; };
       inline void setWithEndline(bool b) { withEndline=b; };
 
- 
+
     public:
       LogOutput(): withDateTime(true),withEndline(false) { };
       virtual void initialize() = 0;
-      virtual void append(const NvjLogSeverity& l, const std::string& m, const std::string &details) = 0;
+      virtual void append(const NvjLogSeverity& l, const nw::string& m, const nw::string &details) = 0;
       virtual ~LogOutput() {};
       inline bool isWithDateTime() { return withDateTime; };
       inline bool isWithEndline() { return withEndline; };

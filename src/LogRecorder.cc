@@ -6,13 +6,14 @@
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
 
 
 
+#include <pthread.h>
 #include <time.h>
 #include "libnavajo/LogRecorder.hh"
 
@@ -27,7 +28,7 @@
   * getDateStr - return a string with the formatted date
   * \return string - formatted date
   */
-  std::string LogRecorder::getDateStr()
+  nw::string LogRecorder::getDateStr()
   {
     struct tm today;
     char tmpbuf[128];
@@ -35,8 +36,8 @@
 
     time( &ltime );
     gmtime_r(&ltime, &today);
-  
-    std::string ret_str;
+
+    nw::string ret_str;
     strftime( tmpbuf, 128, "[%Y-%m-%d %H:%M:%S] >  ", &today );
     ret_str=tmpbuf;
     return ret_str;
@@ -49,29 +50,29 @@
   * \param l - type of entry
   * \param m - message
   */
-  void LogRecorder::append(const NvjLogSeverity& l, const std::string& m, const std::string& details)
+  void LogRecorder::append(const NvjLogSeverity& l, const nw::string& m, const nw::string& details)
   {
     pthread_mutex_lock( &log_mutex );
 
     if (l != NVJ_DEBUG || debugMode)
     {
-      for( std::list<LogOutput *>::iterator it=logOutputsList_.begin(); 
-           it!=logOutputsList_.end(); 
+      for( nw::list<LogOutput *>::iterator it=logOutputsList_.begin();
+           it!=logOutputsList_.end();
      it++ )
       {
-        std::string msg;
+        nw::string msg;
 
         if ((*it)->isWithDateTime())
           msg=getDateStr() + m;
         else msg=m;
 
         if ((*it)->isWithEndline())
-          msg+= std::string("\n") ;
-     
+          msg+= nw::string("\n") ;
+
         (*it)->append(l, msg, details);
       }
-    }   
-    
+    }
+
     pthread_mutex_unlock( &log_mutex );
 
   }
@@ -93,8 +94,8 @@
   */
   void LogRecorder::removeLogOutputs()
   {
-    for( std::list<LogOutput *>::iterator it=logOutputsList_.begin(); 
-           it!=logOutputsList_.end(); 
+    for( nw::list<LogOutput *>::iterator it=logOutputsList_.begin();
+           it!=logOutputsList_.end();
      it++ )
       delete *it;
 
@@ -104,18 +105,18 @@
   /***********************************************************************/
   /**
   * LogRecorder - base constructor
-  */ 
+  */
 
   LogRecorder::LogRecorder()
   {
     debugMode=false;
     pthread_mutex_init(&log_mutex, NULL);
   }
-  
+
   /***********************************************************************/
   /**
   * ~LogRecorder - destructor
-  */   
+  */
   LogRecorder::~LogRecorder()
   {
     removeLogOutputs();

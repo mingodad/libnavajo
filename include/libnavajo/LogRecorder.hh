@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LogRecorder.hh 
+ * @file  LogRecorder.hh
  *
  * @brief Log Manager class
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -14,17 +14,24 @@
 #ifndef LOGRECORDER_HH_
 #define LOGRECORDER_HH_
 
+#ifdef USE_USTL
+#include <ustl.h>
+namespace nw=ustl;
+#else
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <list>
 #include <set>
+namespace nw=std;
+#endif // USE_USTL
+
 #include "libnavajo/LogOutput.hh"
 
 #define NVJ_LOG LogRecorder::getInstance()
 
-using namespace std;
+using namespace nw;
 
 
   /**
@@ -35,14 +42,14 @@ using namespace std;
 
      pthread_mutex_t log_mutex;
      bool debugMode;
-     std::set<string> uniqLog; // Only one entry !
-     
+     nw::set<string> uniqLog; // Only one entry !
+
     public:
 
       /**
       * getInstance - return/create a static logRecorder object
       * \return theLogRecorder - static log recorder
-      */   
+      */
       inline static LogRecorder *getInstance()
       {
 	      if (theLogRecorder == NULL)
@@ -53,20 +60,20 @@ using namespace std;
       /**
       * freeInstance - free the static logRecorder object
       */
-      
+
       static void freeInstance()
-      {  
+      {
 	      if (theLogRecorder != NULL)
 	        delete theLogRecorder;
-		
+
 	      theLogRecorder=NULL;
       }
       void setDebugMode(bool d=true) { debugMode=d; };
       void addLogOutput(LogOutput *);
       void removeLogOutputs();
-      void append(const NvjLogSeverity& l, const std::string& msg, const std::string& details="");
-      inline void appendUniq(const NvjLogSeverity& l, const std::string& msg, const std::string& details="")
-      { 
+      void append(const NvjLogSeverity& l, const nw::string& msg, const nw::string& details="");
+      inline void appendUniq(const NvjLogSeverity& l, const nw::string& msg, const nw::string& details="")
+      {
 	      set<string>::iterator it;
 	      it=uniqLog.find(msg+details);
 	      if (it==uniqLog.end())
@@ -80,13 +87,13 @@ using namespace std;
     protected:
       LogRecorder();
       ~LogRecorder();
-      std::string getDateStr();
+      nw::string getDateStr();
 
-      std::list<LogOutput *> logOutputsList_;
+      nw::list<LogOutput *> logOutputsList_;
 
       static LogRecorder *theLogRecorder;
-            
+
   };
-  
+
 
 #endif

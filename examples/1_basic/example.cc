@@ -1,18 +1,18 @@
 //********************************************************
 /**
- * @file  example.cc 
+ * @file  example.cc
  *
  * @brief libnavajo example code.
  *
  * @author T.Descombes (descombes@lpsc.in2p3.fr)
  *
- * @version 1	
+ * @version 1
  * @date 27/01/15
  */
 //********************************************************
 
-#include <signal.h> 
-#include <string.h> 
+#include <signal.h>
+#include <string.h>
 #include "libnavajo/AuthPAM.hh"
 #include "libnavajo/libnavajo.hh"
 #include "libnavajo/LogStdOutput.hh"
@@ -32,7 +32,7 @@ class MyDynamicPage: public DynamicPage
   {
     // example using session's object
     int *cptExample=NULL;
-    
+
     void *myAttribute = request->getSessionAttribute("myAttribute");
     if (myAttribute == NULL)
     {
@@ -43,7 +43,7 @@ class MyDynamicPage: public DynamicPage
     else
       cptExample=(int*)request->getSessionAttribute("myAttribute");
 
-    *cptExample=*cptExample+1;    
+    *cptExample=*cptExample+1;
     //
 
     string content="<HTML><BODY>";
@@ -56,11 +56,11 @@ class MyDynamicPage: public DynamicPage
     else
       content+="param1 hasn't been set";
 
-    stringstream myAttributess; myAttributess << *cptExample;
+    ostringstream myAttributess; myAttributess << *cptExample;
     content+="<BR/>my session attribute myAttribute contains "+myAttributess.str();
 
     content+="</BODY></HTML>";
-   
+
     return fromString(content, response);
   }
 };
@@ -71,7 +71,7 @@ int main()
   // connect signals
   signal( SIGTERM, exitFunction );
   signal( SIGINT, exitFunction );
-  
+
   NVJ_LOG->addLogOutput(new LogStdOutput);
   //NVJ_LOG->addLogOutput(new LogFile("/var/log/navajo.log"));
 
@@ -114,7 +114,7 @@ int main()
   // Your Processing here !
   //...
   webServer->wait();
-  
+
   LogRecorder::freeInstance();
   return 0;
 }

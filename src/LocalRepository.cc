@@ -1,12 +1,12 @@
 //********************************************************
 /**
- * @file  LocalRepository.cc 
+ * @file  LocalRepository.cc
  *
  * @brief Handles local web repository
  *
  * @author T.Descombes (thierry.descombes@gmail.com)
  *
- * @version 1        
+ * @version 1
  * @date 19/02/15
  */
 //********************************************************
@@ -16,9 +16,16 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
+#ifdef USE_USTL
+#include <ustl.h>
+namespace nw=ustl;
+#else
 #include <fstream>
 #include <streambuf>
 #include <sstream>
+namespace nw=std;
+#endif // USE_USTL
+
 #include "libnavajo/LogRecorder.hh"
 #include "libnavajo/LocalRepository.hh"
 
@@ -34,13 +41,13 @@ bool LocalRepository::loadFilename_dir (const string& alias, const string& path,
 
     dir = opendir (fullPath.c_str());
     if (dir == NULL) return false;
-    while ((entry = readdir (dir)) != NULL ) 
+    while ((entry = readdir (dir)) != NULL )
     {
       if (!strcmp(entry->d_name,".") || !strcmp(entry->d_name,"..") || !strlen(entry->d_name)) continue;
 
-      std::string filepath=fullPath+'/'+entry->d_name;
+      nw::string filepath=fullPath + "/" +entry->d_name;
 
-      if (stat(filepath.c_str(), &s) == -1) 
+      if (stat(filepath.c_str(), &s) == -1)
       {
 	NVJ_LOG->append(NVJ_ERROR,string("LocalRepository - stat error : ")+string(strerror(errno)));
         continue;
@@ -50,7 +57,7 @@ bool LocalRepository::loadFilename_dir (const string& alias, const string& path,
       if (type == S_IFREG || type == S_IFLNK)
       {
 	string filename=alias+subpath+"/"+entry->d_name;
-	while (filename.size() && filename[0]=='/') filename.erase(0, 1);
+	while (filename.size() && filename[0]=='/') filename.erase((size_t)0, 1);
 	filenamesSet.insert(filename);
       }
 
@@ -68,9 +75,9 @@ void LocalRepository::addDirectory( const string& alias, const string& dirPath)
   char resolved_path[4096];
 
   string newalias=alias;
-  while (newalias.size() && newalias[0]=='/') newalias.erase(0, 1);
+  while (newalias.size() && newalias[0]=='/') newalias.erase((size_t)0, 1);
   while (newalias.size() && newalias[newalias.size()-1]=='/') newalias.erase(newalias.size() - 1);
-  
+
   if (realpath(dirPath.c_str(), resolved_path) == NULL)
     return ;
 
@@ -100,7 +107,7 @@ bool LocalRepository::fileExist(const string& url)
 
 void LocalRepository::printFilenames()
 {
-  for (std::set<std::string>::iterator it = filenamesSet.begin(); it != filenamesSet.end(); it++)
+  for (nw::set<nw::string>::iterator it = filenamesSet.begin(); it != filenamesSet.end(); it++)
     printf ("%s\n", it->c_str() );
 }
 
@@ -117,7 +124,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
 
   if (!fileExist(url)) { pthread_mutex_unlock( &_mutex); return false; };
 
-  for (std::set< pair<string,string> >::iterator it = aliasesSet.begin(); it != aliasesSet.end() && !found; it++)
+  for (nw::set< pair<string,string> >::iterator it = aliasesSet.begin(); it != aliasesSet.end() && !found; it++)
   {
     alias=&(it->first);
     if (!(url.compare(0, alias->size(), *alias)))
@@ -126,7 +133,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
       found= true;
     }
   }
-    
+
   pthread_mutex_unlock( &_mutex);
   if (!found) return false;
 
@@ -161,7 +168,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
     NVJ_LOG->append(NVJ_ERROR, logBuffer);
     return false;
   }
-  
+
   fclose (pFile);
   response->setContent (webpage, webpageLen);
   return true;
