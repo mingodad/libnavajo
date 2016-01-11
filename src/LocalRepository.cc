@@ -16,14 +16,18 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
+
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <fstream>
 #include <streambuf>
 #include <sstream>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "libnavajo/LogRecorder.hh"
@@ -32,12 +36,12 @@ namespace nw=std;
 
 /**********************************************************************/
 
-bool LocalRepository::loadFilename_dir (const string& alias, const string& path, const string& subpath="")
+bool LocalRepository::loadFilename_dir (const nw::string& alias, const nw::string& path, const nw::string& subpath="")
 {
     struct dirent *entry;
     DIR *dir;
     struct stat s;
-    string fullPath=path+subpath;
+    nw::string fullPath=path+subpath;
 
     dir = opendir (fullPath.c_str());
     if (dir == NULL) return false;
@@ -45,19 +49,19 @@ bool LocalRepository::loadFilename_dir (const string& alias, const string& path,
     {
       if (!strcmp(entry->d_name,".") || !strcmp(entry->d_name,"..") || !strlen(entry->d_name)) continue;
 
-      nw::string filepath=fullPath + "/" +entry->d_name;
+      nw::string filepath=fullPath + "/" + entry->d_name;
 
       if (stat(filepath.c_str(), &s) == -1)
       {
-	NVJ_LOG->append(NVJ_ERROR,string("LocalRepository - stat error : ")+string(strerror(errno)));
+	NVJ_LOG->append(NVJ_ERROR,nw::string("LocalRepository - stat error : ")+nw::string(strerror(errno)));
         continue;
       }
 
       int type=s.st_mode & S_IFMT;
       if (type == S_IFREG || type == S_IFLNK)
       {
-	string filename=alias+subpath+"/"+entry->d_name;
-	while (filename.size() && filename[0]=='/') filename.erase((size_t)0, 1);
+	nw::string filename=alias+subpath+"/"+entry->d_name;
+	while (filename.size() && filename[0]=='/') filename.erase(0, 1);
 	filenamesSet.insert(filename);
       }
 
@@ -70,12 +74,12 @@ bool LocalRepository::loadFilename_dir (const string& alias, const string& path,
 
 /**********************************************************************/
 
-void LocalRepository::addDirectory( const string& alias, const string& dirPath)
+void LocalRepository::addDirectory( const nw::string& alias, const nw::string& dirPath)
 {
   char resolved_path[4096];
 
-  string newalias=alias;
-  while (newalias.size() && newalias[0]=='/') newalias.erase((size_t)0, 1);
+  nw::string newalias=alias;
+  while (newalias.size() && newalias[0]=='/') newalias.erase(0, 1);
   while (newalias.size() && newalias[newalias.size()-1]=='/') newalias.erase(newalias.size() - 1);
 
   if (realpath(dirPath.c_str(), resolved_path) == NULL)
@@ -84,7 +88,7 @@ void LocalRepository::addDirectory( const string& alias, const string& dirPath)
   if (!loadFilename_dir(newalias, resolved_path))
 	  return ;
 
-  aliasesSet.insert( pair<string, string>(newalias, resolved_path) );
+  aliasesSet.insert( nw::pair<nw::string, nw::string>(newalias, resolved_path) );
 
 }
 
@@ -98,7 +102,7 @@ void LocalRepository::clearAliases()
 
 /**********************************************************************/
 
-bool LocalRepository::fileExist(const string& url)
+bool LocalRepository::fileExist(const nw::string& url)
 {
   return filenamesSet.find(url) != filenamesSet.end();
 }
@@ -116,15 +120,15 @@ void LocalRepository::printFilenames()
 bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
 {
   bool found=false;
-  const string *alias=NULL, *path=NULL;
-  string url = request->getUrl();
+  const nw::string *alias=NULL, *path=NULL;
+  nw::string url = request->getUrl();
   size_t webpageLen;
   unsigned char *webpage;
   pthread_mutex_lock( &_mutex );
 
   if (!fileExist(url)) { pthread_mutex_unlock( &_mutex); return false; };
 
-  for (nw::set< pair<string,string> >::iterator it = aliasesSet.begin(); it != aliasesSet.end() && !found; it++)
+  for (nw::set< nw::pair<nw::string,nw::string> >::iterator it = aliasesSet.begin(); it != aliasesSet.end() && !found; it++)
   {
     alias=&(it->first);
     if (!(url.compare(0, alias->size(), *alias)))
@@ -137,7 +141,7 @@ bool LocalRepository::getFile(HttpRequest* request, HttpResponse *response)
   pthread_mutex_unlock( &_mutex);
   if (!found) return false;
 
-  string resultat, filename=url;
+  nw::string resultat, filename=url;
 
   if (alias->size())
     filename.replace(0, alias->size(), *path);

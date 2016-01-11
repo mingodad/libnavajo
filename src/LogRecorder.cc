@@ -11,8 +11,6 @@
  */
 //********************************************************
 
-
-
 #include <pthread.h>
 #include <time.h>
 #include "libnavajo/LogRecorder.hh"

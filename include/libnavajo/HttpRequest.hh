@@ -14,19 +14,22 @@
 #ifndef HTTPREQUEST_HH_
 #define HTTPREQUEST_HH_
 
+
 #include "libnavajo/IpAddress.hh"
+
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+#include <libnavajo/with_ustl.h>
 #else
 #include <map>
 #include <vector>
 #include <string>
 #include <sstream>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
 #endif // USE_USTL
+
 #include <openssl/ssl.h>
 #include "HttpSession.hh"
+
 
 //****************************************************************************
 
@@ -39,7 +42,7 @@ typedef struct
   CompressionMode compression;
   SSL *ssl;
   BIO *bio;
-  string *peerDN;
+  nw::string *peerDN;
 } ClientSockData;
 
 class HttpRequest
@@ -77,9 +80,9 @@ class HttpRequest
           {
             unsigned int specar;
             nw::string hexChar=paramstr.substr(end+1,2);
-            //nw::stringstream ss; ss << nw::hex << hexChar.c_str();
-            //ss >> specar;
             sscanf(hexChar.c_str(), "%2X", &specar);
+/*          nw::stringstream ss; ss << nw::hex << hexChar.c_str();
+            ss >> specar; */
             paramstr[end] = (char)specar;
             paramstr=paramstr.erase(end+1,2);
           }
@@ -336,7 +339,7 @@ class HttpRequest
     * @param params:  raw http parameters string
     * @cookies params: raw http cookies string
     */
-    HttpRequest(const HttpRequestMethod type, const char *url, const char *params, const char *cookies, const char *origin, const string &username, ClientSockData *client)
+    HttpRequest(const HttpRequestMethod type, const char *url, const char *params, const char *cookies, const char *origin, const nw::string &username, ClientSockData *client)
     {
       httpMethod = type;
       this->url = url;
@@ -387,7 +390,7 @@ class HttpRequest
     * get http authentification username
     * @return the login
     */
-    inline string& getHttpAuthUsername()
+    inline nw::string& getHttpAuthUsername()
     {
       return httpAuthUsername;
     };
@@ -397,7 +400,7 @@ class HttpRequest
     * get peer x509 dn
     * @return the DN of the peer certificate
     */
-    inline string& getX509PeerDN()
+    inline nw::string& getX509PeerDN()
     {
       return *(clientSockData->peerDN);
     };

@@ -15,24 +15,24 @@
 #define LOGRECORDER_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
 #include <list>
 #include <set>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "libnavajo/LogOutput.hh"
 
 #define NVJ_LOG LogRecorder::getInstance()
-
-using namespace nw;
-
 
   /**
   * LogRecorder - generic class to handle log trace
@@ -42,7 +42,7 @@ using namespace nw;
 
      pthread_mutex_t log_mutex;
      bool debugMode;
-     nw::set<string> uniqLog; // Only one entry !
+     nw::set<nw::string> uniqLog; // Only one entry !
 
     public:
 
@@ -74,7 +74,7 @@ using namespace nw;
       void append(const NvjLogSeverity& l, const nw::string& msg, const nw::string& details="");
       inline void appendUniq(const NvjLogSeverity& l, const nw::string& msg, const nw::string& details="")
       {
-	      set<string>::iterator it;
+	      nw::set<nw::string>::iterator it;
 	      it=uniqLog.find(msg+details);
 	      if (it==uniqLog.end())
 	      {

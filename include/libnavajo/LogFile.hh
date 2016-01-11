@@ -15,19 +15,21 @@
 #define LOGFILE_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "libnavajo/LogOutput.hh"
 
-using namespace nw;
 
   /**
   * LogFile - LogOutput
@@ -43,7 +45,7 @@ using namespace nw;
 
     private:
       char filename[30];
-      ofstream *file;
+      nw::ofstream *file;
 
   };
 

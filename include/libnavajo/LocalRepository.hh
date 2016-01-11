@@ -17,26 +17,29 @@
 #include "WebRepository.hh"
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <set>
 #include <string>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
+
 #include "libnavajo/thread.h"
 
-using namespace std;
 
 class LocalRepository : public WebRepository
 {
     pthread_mutex_t _mutex;
 
-    set< string > filenamesSet; // list of available files
-    set< pair<string,string> > aliasesSet; // alias name | Path to local directory
+    nw::set< nw::string > filenamesSet; // list of available files
+    nw::set< nw::pair<nw::string,nw::string> > aliasesSet; // alias name | Path to local directory
 
-    bool loadFilename_dir(const string& alias, const string& path, const string& subpath);
-    bool fileExist(const string& url);
+    bool loadFilename_dir(const nw::string& alias, const nw::string& path, const nw::string& subpath);
+    bool fileExist(const nw::string& url);
 
 
   public:
@@ -45,7 +48,7 @@ class LocalRepository : public WebRepository
 
     virtual bool getFile(HttpRequest* request, HttpResponse *response);
     virtual void freeFile(unsigned char *webpage) { ::free(webpage); };
-    void addDirectory(const string& alias, const string& dirPath);
+    void addDirectory(const nw::string& alias, const nw::string& dirPath);
     void clearAliases();
     void printFilenames();
 };

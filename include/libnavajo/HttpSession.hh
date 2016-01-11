@@ -15,17 +15,21 @@
 #define HTTPSESSION_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <map>
 #include <vector>
 #include <string>
 #include <sstream>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include <stdlib.h>
+
 
 class HttpSession
 {

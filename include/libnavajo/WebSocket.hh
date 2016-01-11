@@ -15,12 +15,15 @@
 #define WEBSOCKET_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <algorithm>
 #include <list>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "libnavajo/HttpRequest.hh"
@@ -28,7 +31,7 @@ namespace nw=std;
 
 class WebSocket
 {
-    list<HttpRequest*> wsclients;
+    nw::list<HttpRequest*> wsclients;
     pthread_mutex_t wsclients_mutex;
 
   public:
@@ -55,7 +58,7 @@ class WebSocket
     * @param message: the message
     * @param fin: is the current message finished ?
     */
-    virtual void onTextMessage(HttpRequest* request, const string &message, const bool fin)
+    virtual void onTextMessage(HttpRequest* request, const nw::string &message, const bool fin)
     { };
 
 
@@ -102,12 +105,12 @@ class WebSocket
     * @param message: the text message
     * @param fin: is-it the final fragment of the message ?
     */
-    inline static void sendTextMessage(HttpRequest* request, const string &message, bool fin=true)
+    inline static void sendTextMessage(HttpRequest* request, const nw::string &message, bool fin=true)
     {
       WebServer::webSocketSendTextMessage(request, message, fin);
     };
 
-    inline void sendBroadcastTextMessage(const string &message, bool fin=true)
+    inline void sendBroadcastTextMessage(const nw::string &message, bool fin=true)
     {
       pthread_mutex_lock(&wsclients_mutex);
       for (nw::list<HttpRequest*>::iterator it = wsclients.begin(); it != wsclients.end(); it++)
@@ -143,7 +146,7 @@ class WebSocket
     * @param request: the http request object
     * @param message: the closure reason message
     */
-    inline static void sendCloseCtrlFrame(HttpRequest* request, const string& reasonMsg="")
+    inline static void sendCloseCtrlFrame(HttpRequest* request, const nw::string& reasonMsg="")
     {
       WebServer::webSocketSendCloseCtrlFrame(request, reasonMsg);
     };
@@ -164,7 +167,7 @@ class WebSocket
     * @param request: the http request object
     * @param message: the content
     */
-    inline static void sendPingCtrlFrame(HttpRequest* request, const string &message)
+    inline static void sendPingCtrlFrame(HttpRequest* request, const nw::string &message)
     {
       WebServer::webSocketSendPingCtrlFrame(request, message);
     };
@@ -186,7 +189,7 @@ class WebSocket
     * @param request: the http request object
     * @param message: the content
     */
-    inline static void sendPongCtrlFrame(HttpRequest* request, const string &message)
+    inline static void sendPongCtrlFrame(HttpRequest* request, const nw::string &message)
     {
       WebServer::webSocketSendPongCtrlFrame(request, message);
     };

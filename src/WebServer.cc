@@ -57,13 +57,16 @@
 #include <stdlib.h>
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <sstream>
 #include <iostream>
 #include <algorithm>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include <fcntl.h>
@@ -83,15 +86,15 @@ namespace nw=std;
 const char WebServer::authStr[]="Authorization: Basic ";
 const int WebServer::verify_depth=512;
 char *WebServer::certpass=NULL;
-string WebServer::webServerName;
+nw::string WebServer::webServerName;
 pthread_mutex_t IpAddress::resolvIP_mutex = PTHREAD_MUTEX_INITIALIZER;
 HttpSession::HttpSessionsContainerMap HttpSession::sessions;
 pthread_mutex_t HttpSession::sessions_mutex=PTHREAD_MUTEX_INITIALIZER;
-const string WebServer::base64_chars =
+const nw::string WebServer::base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
-const string WebServer::webSocketMagicString="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+const nw::string WebServer::webSocketMagicString="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 
 
 time_t HttpSession::lastExpirationSearchTime=0;
@@ -185,7 +188,7 @@ void WebServer::updatePeerDnHistory(nw::string dn)
 * @param name: set to the decoded login name
 * @return true if user is allowed
 */
-bool WebServer::isUserAllowed(const string &pwdb64, string& login)
+bool WebServer::isUserAllowed(const nw::string &pwdb64, nw::string& login)
 {
 
   pthread_mutex_lock( &usersAuthHistory_mutex );
@@ -208,23 +211,23 @@ bool WebServer::isUserAllowed(const string &pwdb64, string& login)
 
   // It's a new user !
   bool authOK=false;
-  string loginPwd=base64_decode(pwdb64.c_str());
+  nw::string loginPwd=base64_decode(pwdb64.c_str());
   printf ("%s => %s", loginPwd.c_str(), pwdb64.c_str());
   size_t loginPwdSep=loginPwd.find(':');
-  if (loginPwdSep==string::npos)
+  if (loginPwdSep==nw::string::npos)
   {
     pthread_mutex_unlock( &usersAuthHistory_mutex );
     return false;
   }
 
   login=loginPwd.substr(0,loginPwdSep);
-  string pwd=loginPwd.substr(loginPwdSep+1);
+  nw::string pwd=loginPwd.substr(loginPwdSep+1);
 
-  vector<string> httpAuthLoginPwd=authLoginPwdList;
+  nw::vector<nw::string> httpAuthLoginPwd=authLoginPwdList;
   if (httpAuthLoginPwd.size())
   {
-    string logPass=login+':'+pwd;
-    for ( vector<string>::iterator it=httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); it++ )
+    nw::string logPass=login+':'+pwd;
+    for ( nw::vector<nw::string>::iterator it=httpAuthLoginPwd.begin(); it != httpAuthLoginPwd.end(); it++ )
       if ( logPass == *it )
         authOK=true;
   }
@@ -233,7 +236,7 @@ bool WebServer::isUserAllowed(const string &pwdb64, string& login)
   {
     if (authPamUsersList.size())
     {
-      for ( vector<string>::iterator it=authPamUsersList.begin(); it != authPamUsersList.end(); it++ )
+      for ( nw::vector<nw::string>::iterator it=authPamUsersList.begin(); it != authPamUsersList.end(); it++ )
         if (login == *it)
           authOK=AuthPAM::authentificate(login.c_str(), pwd.c_str(), pamService.c_str());
     }
@@ -297,7 +300,7 @@ bool WebServer::accept_request(ClientSockData* client)
   char requestParams[BUFSIZE], requestCookies[BUFSIZE], requestOrigin[BUFSIZE], webSocketClientKey[BUFSIZE];
   bool websocket=false;
   int webSocketVersion=-1;
-  string username;
+  nw::string username;
   size_t bufLineLen=0;
   BIO *ssl_bio = NULL;
 
@@ -372,7 +375,7 @@ bool WebServer::accept_request(ClientSockData* client)
           j+=sizeof authStr - 1;
 
           // decode login/passwd
-          string pwdb64="";
+          nw::string pwdb64="";
           while ( j < (unsigned)bufLineLen && *(bufLine + j) != 0x0d && *(bufLine + j) != 0x0a)
             pwdb64+=*(bufLine + j++);;
           if (!authOK)
@@ -537,7 +540,7 @@ bool WebServer::accept_request(ClientSockData* client)
     HttpRequest request(requestMethod, url, requestParams, requestCookies, requestOrigin, username, client);
 
     const char *mime=get_mime_type(url);
-    string mimeStr; if (mime != NULL) mimeStr=mime;
+    nw::string mimeStr; if (mime != NULL) mimeStr=mime;
     HttpResponse response(mimeStr);
 
     nw::vector<WebRepository *>::const_iterator repo=webRepositories.begin();
@@ -709,7 +712,7 @@ void WebServer::httpSend(ClientSockData *client, const void *buf, size_t len)
 
 void WebServer::fatalError(const char *s)
 {
-  NVJ_LOG->append(NVJ_FATAL,string(s)+": "+string(strerror(errno)));
+  NVJ_LOG->append(NVJ_FATAL,nw::string(s)+": "+nw::string(strerror(errno)));
   ::exit(1);
 }
 
@@ -825,7 +828,7 @@ nw::string WebServer::getHttpHeader(const char *messageType, const size_t len, c
   else
     header+="Connection: close\r\n";
 
-  string mimetype="text/html";
+  nw::string mimetype="text/html";
   if (response != NULL)
     mimetype=response->getMimeType();
   header+="Content-Type: "+ mimetype  + "\r\n";
@@ -1183,8 +1186,8 @@ void WebServer::poolThreadProcessing()
 
       if (SSL_accept(ssl) <= 0)
       { const char *sslmsg=ERR_reason_error_string(ERR_get_error());
-        string msg="SSL accept error ";
-        if (sslmsg != NULL) msg+=": "+string(sslmsg);
+        nw::string msg="SSL accept error ";
+        if (sslmsg != NULL) msg+=": "+nw::string(sslmsg);
         NVJ_LOG->append(NVJ_DEBUG,msg);
       }
 
@@ -1499,9 +1502,9 @@ nw::string WebServer::base64_encode(unsigned char const* bytes_to_encode, unsign
 * @param input - the string to encode
 * \return the encoded string
 ************************************************************************/
-string WebServer::SHA1_encode(const string& input)
+nw::string WebServer::SHA1_encode(const nw::string& input)
 {
-    string hash;
+    nw::string hash;
     SHA_CTX context;
     SHA1_Init(&context);
     SHA1_Update(&context, &input[0], input.size());
@@ -1515,9 +1518,9 @@ string WebServer::SHA1_encode(const string& input)
 * @param webSocketKey - the websocket client key.
 * \return the websocket server key
 ************************************************************************/
-string WebServer::generateWebSocketServerKey(string webSocketKey)
+nw::string WebServer::generateWebSocketServerKey(nw::string webSocketKey)
 {
-  string sha1Key=SHA1_encode(webSocketKey+webSocketMagicString);
+  nw::string sha1Key=SHA1_encode(webSocketKey+webSocketMagicString);
   return base64_encode(reinterpret_cast<const unsigned char*>(sha1Key.c_str()), sha1Key.length());
 }
 
@@ -1734,7 +1737,7 @@ void WebServer::listenWebSocket(WebSocket *websocket, HttpRequest* request)
             }
             catch (nw::exception& e)
             {
-              NVJ_LOG->append(NVJ_ERROR, string(" Websocket: nvj_gzip raised an exception: ") +  e.what());
+              NVJ_LOG->append(NVJ_ERROR, nw::string(" Websocket: nvj_gzip raised an exception: ") +  e.what());
               msgLength = 0;
             }
           }
@@ -1743,7 +1746,7 @@ void WebServer::listenWebSocket(WebSocket *websocket, HttpRequest* request)
           {
             case 0x1:
               if (msgLength)
-                websocket->onTextMessage(request, string((char*)msgContent, msgLength), fin);
+                websocket->onTextMessage(request, nw::string((char*)msgContent, msgLength), fin);
               else websocket->onTextMessage(request, "", fin);
               break;
             case 0x2:
@@ -1876,7 +1879,7 @@ void WebServer::webSocketSend(HttpRequest* request, const u_int8_t opcode, const
 
 /***********************************************************************/
 
-void WebServer::webSocketSendTextMessage(HttpRequest* request, const string &message, bool fin)
+void WebServer::webSocketSendTextMessage(HttpRequest* request, const nw::string &message, bool fin)
 {
   webSocketSend(request, 0x1, (const unsigned char*)(message.c_str()), message.length(), fin);
 }
@@ -1895,7 +1898,7 @@ void WebServer::webSocketSendPingCtrlFrame(HttpRequest* request, const unsigned 
   webSocketSend(request, 0x9, message, length, true);
 }
 
-void WebServer::webSocketSendPingCtrlFrame(HttpRequest* request, const string &message)
+void WebServer::webSocketSendPingCtrlFrame(HttpRequest* request, const nw::string &message)
 {
   webSocketSend(request, 0x9, (const unsigned char*)message.c_str(), message.length(), true);
 }
@@ -1907,7 +1910,7 @@ void WebServer::webSocketSendPongCtrlFrame(HttpRequest* request, const unsigned 
   webSocketSend(request, 0xa, message, length, false);
 }
 
-void WebServer::webSocketSendPongCtrlFrame(HttpRequest* request, const string &message)
+void WebServer::webSocketSendPongCtrlFrame(HttpRequest* request, const nw::string &message)
 {
   webSocketSend(request, 0xa, (const unsigned char*)message.c_str(), message.length(), false);
 }
@@ -1919,7 +1922,7 @@ void WebServer::webSocketSendCloseCtrlFrame(HttpRequest* request, const unsigned
   webSocketSend(request, 0x8, message, length, true);
 }
 
-void WebServer::webSocketSendCloseCtrlFrame(HttpRequest* request, const string &message)
+void WebServer::webSocketSendCloseCtrlFrame(HttpRequest* request, const nw::string &message)
 {
   webSocketSend(request, 0x8, (const unsigned char*)message.c_str(), message.length(), true);
 }

@@ -15,12 +15,15 @@
 #define DYNAMICREPOSITORY_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <string>
 #include <map>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "libnavajo/WebRepository.hh"
@@ -43,12 +46,12 @@ class DynamicRepository : public WebRepository
     {
       size_t i=0;
       while (url.size() && url[i]=='/') i++;
-      indexMap.insert(pair<string, DynamicPage *>(url.substr(i, url.size()-i), page)); };
+      indexMap.insert(nw::pair<nw::string, DynamicPage *>(url.substr(i, url.size()-i), page)); };
 
     inline virtual bool getFile(HttpRequest* request, HttpResponse *response)
     {
-      string url = request->getUrl();
-      while (url.size() && url[0]=='/') url.erase((size_t)0, 1);
+      nw::string url = request->getUrl();
+      while (url.size() && url[0]=='/') url.erase(0, 1);
       pthread_mutex_lock( &_mutex );
       IndexMap::const_iterator i = indexMap.find (url);
       if (i == indexMap.end())

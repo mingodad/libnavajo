@@ -14,7 +14,6 @@
 #ifndef WEBSERVER_HH_
 #define WEBSERVER_HH_
 
-
 #include <stdio.h>
 #include <sys/types.h>
 #ifdef LINUX
@@ -24,21 +23,24 @@
 #endif
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <queue>
 #include <string>
 #include <map>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+
 #include "libnavajo/LogRecorder.hh"
 #include "libnavajo/IpAddress.hh"
 #include "libnavajo/WebRepository.hh"
-
 #include "libnavajo/thread.h"
 #include "libnavajo/nvj_gzip.h"
 
@@ -65,7 +67,7 @@ class WebServer
     void initialize_ctx(const char *certfile, const char *cafile, const char *password);
     static int password_cb(char *buf, int num, int rwflag, void *userdata);
 
-    bool isUserAllowed(const string &logpassb64, string &username);
+    bool isUserAllowed(const nw::string &logpassb64, nw::string &username);
     bool isAuthorizedDN(const nw::string str);
 
     void httpSend(ClientSockData *client, const void *buf, size_t len);
@@ -121,7 +123,7 @@ class WebServer
     bool disableIpV4, disableIpV6;
     ushort tcpPort;
     size_t threadsPoolSize;
-    string device;
+    nw::string device;
 
     bool sslEnabled;
     nw::string sslCertFile, sslCaFile, sslCertPwd;
@@ -136,15 +138,15 @@ class WebServer
     nw::vector<WebRepository *> webRepositories;
     static inline bool is_base64(unsigned char c)
       { return (isalnum(c) || (c == '+') || (c == '/')); };
-    static const string base64_chars;
+    static const nw::string base64_chars;
     static nw::string base64_decode(const nw::string& encoded_string);
     static nw::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len);
     static void closeSocket(ClientSockData* client);
     nw::map<nw::string, WebSocket *> webSocketEndPoints;
-    static nw::string SHA1_encode(const string& input);
-    static const string webSocketMagicString;
-    static string generateWebSocketServerKey(string webSocketKey);
-    static string getHttpWebSocketHeader(const char *messageType, const char* webSocketClientKey, const bool webSocketDeflate);
+    static nw::string SHA1_encode(const nw::string& input);
+    static const nw::string webSocketMagicString;
+    static nw::string generateWebSocketServerKey(nw::string webSocketKey);
+    static nw::string getHttpWebSocketHeader(const char *messageType, const char* webSocketClientKey, const bool webSocketDeflate);
     void listenWebSocket(WebSocket *websocket, HttpRequest* request);
     void startWebSocketListener(WebSocket *websocket, HttpRequest* request);
     nw::list<int> webSocketClientList;
@@ -167,14 +169,14 @@ class WebServer
   public:
     WebServer();
     static void webSocketSend(HttpRequest* request, const u_int8_t opcode, const unsigned char* message, size_t length, bool fin);
-    static void webSocketSendTextMessage(HttpRequest* request, const string &message, bool fin=true);
+    static void webSocketSendTextMessage(HttpRequest* request, const nw::string &message, bool fin=true);
     static void webSocketSendBinaryMessage(HttpRequest* request, const unsigned char* message, size_t length, bool fin=true);
     static void webSocketSendPingCtrlFrame(HttpRequest* request, const unsigned char* message, size_t length);
-    static void webSocketSendPingCtrlFrame(HttpRequest* request, const string &message);
+    static void webSocketSendPingCtrlFrame(HttpRequest* request, const nw::string &message);
     static void webSocketSendPongCtrlFrame(HttpRequest* request, const unsigned char* message, size_t length);
-    static void webSocketSendPongCtrlFrame(HttpRequest* request, const string &message);
+    static void webSocketSendPongCtrlFrame(HttpRequest* request, const nw::string &message);
     static void webSocketSendCloseCtrlFrame(HttpRequest* request, const unsigned char* message, size_t length);
-    static void webSocketSendCloseCtrlFrame(HttpRequest* request, const string &message="");
+    static void webSocketSendCloseCtrlFrame(HttpRequest* request, const nw::string &message="");
 
     /**
     * Set the web server name in the http header
@@ -220,14 +222,14 @@ class WebServer
     * Restricted X509 authentification to a DN user list. Add this given DN.
     * @param dn: user certificate DN
     */
-    inline void addAuthPeerDN(const char* dn) { authDnList.push_back(string(dn)); };
+    inline void addAuthPeerDN(const char* dn) { authDnList.push_back(nw::string(dn)); };
 
     /**
     * Enabled http authentification for a given login/password list
     * @param login: user login
     * @param pass : user password
     */
-    inline void addLoginPass(const char* login, const char* pass) { authLoginPwdList.push_back(string(login)+':'+string(pass)); };
+    inline void addLoginPass(const char* login, const char* pass) { authLoginPwdList.push_back(nw::string(login)+':'+nw::string(pass)); };
 
     /**
     * Use PAM authentification (if supported)
@@ -239,7 +241,7 @@ class WebServer
     * Restricts PAM authentification to a list of allowed users. Add this user.
     * @param user : an allowed pam user login
     */
-    inline void addAuthPamUser(const char* user) { authPamUsersList.push_back(string(user)); };
+    inline void addAuthPamUser(const char* user) { authPamUsersList.push_back(nw::string(user)); };
 
     /**
     * Add a web repository (containing web pages)
@@ -252,7 +254,7 @@ class WebServer
     * @param endpoint : websocket endpoint
     * @param websocket : WebSocket instance
     */
-    void addWebSocket(const string endPoint, WebSocket* websocket) { webSocketEndPoints[endPoint]=websocket; };
+    void addWebSocket(const nw::string endPoint, WebSocket* websocket) { webSocketEndPoints[endPoint]=websocket; };
 
     /**
     * IpV4 hosts only

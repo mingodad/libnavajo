@@ -15,16 +15,18 @@
 #define PRECOMPILEDREPOSITORY_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <string>
 #include <map>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
 
 #include "thread.h"
-
 #include "libnavajo/WebRepository.hh"
 
 
@@ -47,7 +49,7 @@ class PrecompiledRepository : public WebRepository
     PrecompiledRepository(const nw::string& l="")
     {
       location=l;
-      while (location.size() && location[0]=='/') location.erase((size_t)0, 1);
+      while (location.size() && location[0]=='/') location.erase(0, 1);
       while (location.size() && location[location.size()-1]=='/') location.erase(location.size() - 1);
       pthread_mutex_init(&_mutex, NULL);
       if (!indexMap.size()) initIndexMap();
@@ -64,8 +66,8 @@ class PrecompiledRepository : public WebRepository
       if (url.compare(0, location.length(), location) != 0)
         return false;
 
-      url.erase((size_t)0, location.length());
-      while (url.size() && url[0]=='/') url.erase((size_t)0, 1);
+      url.erase(0, location.length());
+      while (url.size() && url[0]=='/') url.erase(0, 1);
       if (!url.size()) url="index.html";
 
       size_t webpageLen;

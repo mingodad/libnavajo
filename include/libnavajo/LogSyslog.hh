@@ -15,20 +15,21 @@
 #define LOGSYSLOG_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
-namespace nw=std;
-#endif // USE_USTL
+#include <libnavajo/with_ustl.h>
 
+#endif // USE_USTL
 
 #include "libnavajo/LogOutput.hh"
 
-using namespace std;
 
   /**
   * LogSyslog - LogOutput

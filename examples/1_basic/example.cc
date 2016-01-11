@@ -46,8 +46,8 @@ class MyDynamicPage: public DynamicPage
     *cptExample=*cptExample+1;
     //
 
-    string content="<HTML><BODY>";
-    string param;
+    nw::string content="<HTML><BODY>";
+    nw::string param;
     if (request->getParameter("param1", param))
     {
       //int pint=getValue<int>(param);
@@ -56,7 +56,7 @@ class MyDynamicPage: public DynamicPage
     else
       content+="param1 hasn't been set";
 
-    ostringstream myAttributess; myAttributess << *cptExample;
+    nw::ostringstream myAttributess; myAttributess << *cptExample;
     content+="<BR/>my session attribute myAttribute contains "+myAttributess.str();
 
     content+="</BODY></HTML>";

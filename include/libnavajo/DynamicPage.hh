@@ -15,13 +15,17 @@
 #define DYNAMICPAGE_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <string>
 #include <typeinfo>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
+
 
 class DynamicPage
 {
@@ -33,7 +37,7 @@ class DynamicPage
 
     /**********************************************************************/
 
-    template<class T> static inline T getValue (string s)
+    template<class T> static inline T getValue (nw::string s)
     {
       if (!s.length())
        throw nw::bad_cast();
@@ -58,7 +62,7 @@ class DynamicPage
 
     /**********************************************************************/
 
-    inline bool fromString( const string& resultat, HttpResponse *response )
+    inline bool fromString( const nw::string& resultat, HttpResponse *response )
     {
       size_t webpageLen;
       unsigned char *webpage;

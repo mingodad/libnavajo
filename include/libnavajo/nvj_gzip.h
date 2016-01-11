@@ -12,14 +12,17 @@
 //********************************************************
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
-#else
-#include <stdexcept>
-namespace nw=std;
-#endif // USE_USTL
-#include "zlib.h"
 
+#include <libnavajo/with_ustl.h>
+
+#else
+
+#include <stdexcept>
+#include <libnavajo/with_ustl.h>
+
+#endif // USE_USTL
+
+#include "zlib.h"
 #define CHUNK 16384
 
 //********************************************************

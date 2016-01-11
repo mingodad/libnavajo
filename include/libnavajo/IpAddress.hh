@@ -15,15 +15,19 @@
 #define IPADDRESS_HH_
 
 #ifdef USE_USTL
-#include <ustl.h>
-namespace nw=ustl;
+
+#include <libnavajo/with_ustl.h>
+
 #else
+
 #include <stdexcept>
 #include <vector>
 #include <string>
 #include <sstream>
-namespace nw=std;
+#include <libnavajo/with_ustl.h>
+
 #endif // USE_USTL
+
 #include <errno.h>
 #include <string.h>
 
@@ -57,8 +61,6 @@ namespace nw=std;
 #include <stdio.h>
 #include <stdlib.h>
 
-using namespace nw;
-
 #define INET6_ADDRLEN 	16
 
 
@@ -91,7 +93,7 @@ class IpAddress
   IpAddress(const in6_addr &addrIPv6) :
 	  ipversion(6) { memcpy ((void*)&(ip.v6), (void*)(&addrIPv6), INET6_ADDRLEN); };
 
-  IpAddress(const string& value)
+  IpAddress(const nw::string& value)
   {
     init();
     if ( index(value.c_str(), ':') != NULL ) // IPv6
@@ -147,9 +149,9 @@ class IpAddress
 
   inline const bool isUndef() const { return ipversion == 0; };
 
-  inline const string str() const
+  inline const nw::string str() const
   {
-    string res="";
+    nw::string res="";
     if (ipversion == 4)
     {
       struct in_addr iplocal;
@@ -197,7 +199,7 @@ class IpAddress
     return (!error);
   };
 
-  inline static IpAddress* fromString(const string& value)
+  inline static IpAddress* fromString(const nw::string& value)
   {
     IpAddress* newIp =  new IpAddress(value);
 
@@ -275,9 +277,9 @@ class IpNetwork
       return false;
     };
 
-    inline string strCIDR() const
+    inline nw::string strCIDR() const
     {
-      string netCIDR=addr.str()+"/";
+      nw::string netCIDR=addr.str()+"/";
       nw::ostringstream masklengthSs; masklengthSs << (int)mask;
       netCIDR+=masklengthSs.str();
       return netCIDR;
@@ -327,12 +329,12 @@ class IpNetwork
       return res;
     };
 
-    inline static IpNetwork* fromString(const string& value)
+    inline static IpNetwork* fromString(const nw::string& value)
     {
       IpNetwork *ipNet=NULL;
-      string ipstr;
+      nw::string ipstr;
       size_t found=value.find_first_of('/');
-      if (found == string::npos)
+      if (found == nw::string::npos)
       {
         IpAddress *addr=IpAddress::fromString(value);
         if (addr==NULL) return NULL;
@@ -348,10 +350,10 @@ class IpNetwork
         if (addr==NULL) return NULL;
 
         u_int8_t maskDec=0;
-        string maskStr=value.substr(found+1);
+        nw::string maskStr=value.substr(found+1);
 
         // Mask
-        if ( maskStr.find_first_of('.') != string::npos ) // mask is formating like "w.x.y.z"
+        if ( maskStr.find_first_of('.') != nw::string::npos ) // mask is formating like "w.x.y.z"
         {
 	        if (addr->ipversion == 6)
 	        {
